@@ -26,3 +26,10 @@ export async function updatePrograma(id, p) {
 export async function deletePrograma(id) {
     return await fetch(`${API_URL}/${id}`, { method: "DELETE" });
 }
+
+// src/services/divisionService.js
+export const getDivisiones = async () => {
+    const response = await fetch('http://localhost:8080/api/division?soloActivos=true');
+    if (!response.ok) throw new Error('Error al obtener divisiones');
+    return response.json();
+};
