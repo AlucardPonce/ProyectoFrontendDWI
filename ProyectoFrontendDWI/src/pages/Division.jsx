@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { Button } from 'antd';
 
 const Division = () => {
   const [divisiones, setDivisiones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editando, setEditando] = useState(null); // división que se está editando
+  const [editando, setEditando] = useState(null);
+  const [creando, setCreando] = useState(false);
   const [form, setForm] = useState({ nombre: '', clave: '', activo: true });
 
   const fetchDivisiones = () => {
@@ -26,6 +28,12 @@ const Division = () => {
   useEffect(() => {
     fetchDivisiones();
   }, []);
+
+  const showaddModal = () => {
+    setEditando(null);
+    setForm({ nombre: '', clave: '', activo: true });
+    setCreando(true);
+  };
 
   const handleEliminar = (id) => {
     if (!window.confirm('¿Estás seguro de eliminar esta división?')) return;
@@ -62,8 +70,63 @@ const Division = () => {
       .catch(console.error);
   };
 
+  const handleCrear = () => {
+    fetch('http://localhost:8080/api/division', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Error al crear división');
+        return res.json();
+      })
+      .then(() => {
+        setCreando(false);
+        setForm({ nombre: '', clave: '', activo: true });
+        fetchDivisiones();
+      })
+      .catch(console.error);
+  };
+
   return (
     <div className="container">
+
+      <Button 
+        type="primary"
+        onClick={showaddModal}
+        style={{ marginBottom: '20px' }}
+      >
+        Agregar División
+      </Button>
+
+      {creando && (
+        <div style={{ marginBottom: '20px', border: '1px solid #ccc', padding: '10px' }}>
+          <h3>Nueva División</h3>
+          <input
+            placeholder="Nombre"
+            value={form.nombre}
+            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+            style={{ marginRight: '10px' }}
+          />
+          <input
+            placeholder="Clave"
+            value={form.clave}
+            onChange={(e) => setForm({ ...form, clave: e.target.value })}
+            style={{ marginRight: '10px' }}
+          />
+          <select
+            value={form.activo}
+            onChange={(e) => setForm({ ...form, activo: e.target.value === 'true' })}
+            style={{ marginRight: '10px' }}
+          >
+            <option value="true">Activo</option>
+            <option value="false">Inactivo</option>
+          </select>
+          <button onClick={handleCrear} style={{ marginRight: '10px' }}>Guardar</button>
+          <button onClick={() => setCreando(false)}>Cancelar</button>
+        </div>
+      )}
+
       <h1>Divisiones</h1>
       {loading ? (
         <p>Cargando divisiones...</p>
