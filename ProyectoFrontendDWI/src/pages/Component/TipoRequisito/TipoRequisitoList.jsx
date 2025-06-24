@@ -5,20 +5,20 @@ import { confirmDelete, showSuccess, showError } from '../../../helpers/alerts.j
 const TipoRequisitoList = ({ categoriaId, trigger }) => {
     const [requisitos, setRequisitos] = useState([]);
 
-    const cargarDatos = async () => {
-        if (!categoriaId) return;
-        try {
-            const res = await getTiposRequisitoByCategoria(categoriaId);
-            setRequisitos(res.data);
-        } catch (err) {
-            console.error(err);
-            alert('Error al cargar los requisitos');
-        }
-    };
-
     useEffect(() => {
+        const cargarDatos = async () => {
+            if (!categoriaId) return;
+            try {
+                const res = await getTiposRequisitoByCategoria(categoriaId);
+                setRequisitos(res.data);
+            } catch (err) {
+                console.error(err);
+                showError('Error al cargar requisitos', 'No se pudo obtener la lista desde el servidor');
+            }
+        };
+
         cargarDatos();
-    }, [categoriaId, trigger]); // trigger permite recargar al crear/eliminar
+    }, [categoriaId, trigger]);
 
     const eliminar = async (id) => {
         const confirmed = await confirmDelete('este requisito');
@@ -26,7 +26,9 @@ const TipoRequisitoList = ({ categoriaId, trigger }) => {
 
         try {
             await deleteTipoRequisito(id);
-            cargarDatos();
+            // Recargar lista tras eliminación
+            const res = await getTiposRequisitoByCategoria(categoriaId);
+            setRequisitos(res.data);
             showSuccess('Eliminado', 'Requisito eliminado correctamente');
         } catch (err) {
             console.error(err);
@@ -42,9 +44,14 @@ const TipoRequisitoList = ({ categoriaId, trigger }) => {
             ) : (
                 <ul className="list-group">
                     {requisitos.map(r => (
-                        <li key={r.id} className="list-group-item d-flex justify-content-between">
-                            {r.nombre}
-                            <button className="btn btn-sm btn-danger" onClick={() => eliminar(r.id)}>Eliminar</button>
+                        <li key={r.id} className="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{r.nombre}</span>
+                            <button
+                                className="btn btn-sm btn-danger"
+                                onClick={() => eliminar(r.id)}
+                            >
+                                <i className="bi bi-trash"></i> Eliminar
+                            </button>
                         </li>
                     ))}
                 </ul>
