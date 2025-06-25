@@ -2,23 +2,28 @@ import React, { useState, useEffect } from 'react';
 
 const TipoReq = () => {
   const [tipos, setTipos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [form, setForm] = useState({ id: null, nombre: '', categoriaId: '' });
   const [editando, setEditando] = useState(false);
-  const API_URL = 'http://localhost:8001/tipos-requisito';
 
-  // Cargar tipos al iniciar
+  const API_TIPOS = 'http://localhost:8001/tipos-requisito';
+  const API_CATEGORIAS = 'http://localhost:8001/api/categorias';
+
   useEffect(() => {
     fetchTipos();
+    fetchCategorias(); // 🔄 Cargar categorías
   }, []);
 
   const fetchTipos = async () => {
-    try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
-      setTipos(data);
-    } catch (err) {
-      console.error('Error al cargar tipos:', err);
-    }
+    const res = await fetch(API_TIPOS);
+    const data = await res.json();
+    setTipos(data);
+  };
+
+  const fetchCategorias = async () => {
+    const res = await fetch(API_CATEGORIAS);
+    const data = await res.json();
+    setCategorias(data);
   };
 
   const handleChange = (e) => {
@@ -28,25 +33,22 @@ const TipoReq = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const metodo = editando ? 'PUT' : 'POST';
-    const url = editando ? `${API_URL}/${form.id}` : API_URL;
+    const url = editando ? `${API_TIPOS}/${form.id}` : API_TIPOS;
 
     const payload = {
       nombre: form.nombre,
       categoria: form.categoriaId ? { id: parseInt(form.categoriaId) } : null,
     };
 
-    try {
-      await fetch(url, {
-        method: metodo,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      fetchTipos();
-      setForm({ id: null, nombre: '', categoriaId: '' });
-      setEditando(false);
-    } catch (err) {
-      console.error('Error al guardar:', err);
-    }
+    await fetch(url, {
+      method: metodo,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    fetchTipos();
+    setForm({ id: null, nombre: '', categoriaId: '' });
+    setEditando(false);
   };
 
   const handleEditar = (tipo) => {
@@ -60,12 +62,8 @@ const TipoReq = () => {
 
   const handleEliminar = async (id) => {
     if (!window.confirm('¿Eliminar este tipo?')) return;
-    try {
-      await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-      fetchTipos();
-    } catch (err) {
-      console.error('Error al eliminar:', err);
-    }
+    await fetch(`${API_TIPOS}/${id}`, { method: 'DELETE' });
+    fetchTipos();
   };
 
   return (
@@ -84,16 +82,25 @@ const TipoReq = () => {
             required
           />
         </div>
+
         <div className="mb-2">
-          <label>ID Categoría</label>
-          <input
-            type="number"
+          <label>Categoría</label>
+          <select
             className="form-control"
             name="categoriaId"
             value={form.categoriaId}
             onChange={handleChange}
-          />
+            required
+          >
+            <option value="">Seleccione una categoría</option>
+            {categorias.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.nombreCategoria}
+              </option>
+            ))}
+          </select>
         </div>
+
         <button className="btn btn-primary me-2" type="submit">
           {editando ? 'Actualizar' : 'Crear'}
         </button>
@@ -115,7 +122,7 @@ const TipoReq = () => {
           <tr>
             <th>ID</th>
             <th>Nombre</th>
-            <th>Categoría ID</th>
+            <th>Categoría</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -124,7 +131,7 @@ const TipoReq = () => {
             <tr key={tipo.id}>
               <td>{tipo.id}</td>
               <td>{tipo.nombre}</td>
-              <td>{tipo.categoria?.id || 'N/A'}</td>
+              <td>{tipo.categoria?.nombreCategoria || 'N/A'}</td>
               <td>
                 <button className="btn btn-warning btn-sm me-2" onClick={() => handleEditar(tipo)}>
                   Editar
