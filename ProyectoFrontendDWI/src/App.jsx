@@ -16,7 +16,6 @@ function App() {
           <AppRoutes />
         </Content>
         <Footer style={{ textAlign: "center" }}>
-          CRUD App ©2025 UTEQ
         </Footer>
       </Layout>
     </BrowserRouter>
