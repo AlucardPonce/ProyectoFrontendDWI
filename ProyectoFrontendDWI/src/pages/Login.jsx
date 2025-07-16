@@ -1,138 +1,126 @@
-import { Form, Input, Button, Card, Typography, message, Modal, Alert } from "antd";
+import { Form, Input, Button, Card, Typography, message, Alert, Tabs } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const { Title } = Typography;
+const { TabPane } = Tabs;
 
-const LoginPage = () => {
+const API_URL = "http://localhost:8080/api/auth";
+
+const Login = () => {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
 
-  const API_URL = "http://localhost:3001";
-
-  const onFinish = async (values) => {
+  const handleLogin = async (values) => {
     setLoading(true);
     setFormError("");
-
     try {
-      const response = await axios.post(`${API_URL}/login`, values);
-
-      if (response.data.token) {
-        handleLoginSuccess(response.data.token);
-      } else {
-        // Para pruebas sin token válido
-        message.info("Login exitoso (modo prueba)");
+      const res = await axios.post(`${API_URL}/login`, values);
+      if (res.status === 200) {
+        message.success("Login exitoso");
+        // Guardar token si tienes
         navigate("/home");
+      } else {
+        setFormError("Error en login");
       }
-    } catch (error) {
-      const errorMsg = error.response?.data?.message || "Error en la autenticación";
-      setFormError(errorMsg);
-      message.error(errorMsg);
+    } catch (err) {
+      setFormError(err.response?.data || "Error en autenticación");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLoginSuccess = (token) => {
-    // Guardamos el token incluso si no es válido, para pruebas
-    localStorage.setItem("token", token);
-    navigate('/home');
-
-    // Si quisieras validar token, puedes descomentar esto:
-    /*
-    if (typeof token === 'string' && token.split('.').length === 3) {
-      localStorage.setItem("token", token);
-      navigate('/home');
-    } else {
-      console.error('Token recibido no válido:', token);
-      message.error('Error en autenticación');
+  const handleRegister = async (values) => {
+    setLoading(true);
+    setFormError("");
+    try {
+      const res = await axios.post(`${API_URL}/register`, values);
+      if (res.status === 200) {
+        message.success("Usuario registrado correctamente, ahora puedes iniciar sesión");
+        setActiveTab("login"); // Cambio a pestaña login
+      } else {
+        setFormError("Error en registro");
+      }
+    } catch (err) {
+      setFormError(err.response?.data || "Error en registro");
+    } finally {
+      setLoading(false);
     }
-    */
-  };
-
-  const handleResetPassword = () => {
-    let email = "";
-
-    Modal.confirm({
-      title: "Restablecer contraseña",
-      content: (
-        <Input
-          placeholder="Ingresa tu correo electrónico"
-          onChange={(e) => (email = e.target.value)}
-          type="email"
-        />
-      ),
-      onOk: async () => {
-        try {
-          await axios.post(`${API_URL}/reset-password`, { email });
-          message.success("Correo de recuperación enviado");
-        } catch (error) {
-          message.error(error.response?.data?.message || "Error al enviar correo");
-        }
-      },
-    });
   };
 
   return (
     <div style={styles.container}>
       <Card style={styles.card}>
-        <Title level={2} style={styles.title}>
-          Iniciar Sesión
+        <Title level={2} style={{ textAlign: "center", marginBottom: 24 }}>
+          Autenticación
         </Title>
 
         {formError && (
-          <Alert
-            message={formError}
-            type="error"
-            showIcon
-            style={{ marginBottom: 20 }}
-          />
+          <Alert message={formError} type="error" showIcon style={{ marginBottom: 20 }} />
         )}
 
-        <Form layout="vertical" onFinish={onFinish}>
-          <Form.Item
-            label="Usuario"
-            name="username"
-            rules={[{ required: true, message: "Ingrese su usuario" }]}
-          >
-            <Input placeholder="Usuario" />
-          </Form.Item>
+        <Tabs activeKey={activeTab} onChange={setActiveTab} centered>
+          <TabPane tab="Iniciar Sesión" key="login">
+            <Form layout="vertical" onFinish={handleLogin}>
+              <Form.Item
+                label="Usuario"
+                name="username"
+                rules={[{ required: true, message: "Ingrese su usuario" }]}
+              >
+                <Input placeholder="Usuario" />
+              </Form.Item>
 
-          <Form.Item
-            label="Contraseña"
-            name="password"
-            rules={[
-              { required: true, message: "Ingrese su contraseña" },
-              { min: 6, message: "Mínimo 6 caracteres" }
-            ]}
-          >
-            <Input.Password placeholder="Contraseña" />
-          </Form.Item>
+              <Form.Item
+                label="Contraseña"
+                name="password"
+                rules={[
+                  { required: true, message: "Ingrese su contraseña" },
+                  { min: 6, message: "Mínimo 6 caracteres" },
+                ]}
+              >
+                <Input.Password placeholder="Contraseña" />
+              </Form.Item>
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              loading={loading}
-              style={styles.button}
-            >
-              Iniciar Sesión
-            </Button>
-          </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit" block loading={loading}>
+                  Iniciar Sesión
+                </Button>
+              </Form.Item>
+            </Form>
+          </TabPane>
 
-          <div style={styles.footer}>
-            <Button
-              type="link"
-              onClick={handleResetPassword}
-              style={styles.linkButton}
-            >
-              ¿Olvidaste tu contraseña?
-            </Button>
-          </div>
-        </Form>
+          <TabPane tab="Registrar" key="register">
+            <Form layout="vertical" onFinish={handleRegister}>
+              <Form.Item
+                label="Usuario"
+                name="username"
+                rules={[{ required: true, message: "Ingrese un usuario" }]}
+              >
+                <Input placeholder="Usuario" />
+              </Form.Item>
+
+              <Form.Item
+                label="Contraseña"
+                name="password"
+                rules={[
+                  { required: true, message: "Ingrese una contraseña" },
+                  { min: 6, message: "Mínimo 6 caracteres" },
+                ]}
+              >
+                <Input.Password placeholder="Contraseña" />
+              </Form.Item>
+
+              <Form.Item>
+                <Button type="primary" htmlType="submit" block loading={loading}>
+                  Registrar
+                </Button>
+              </Form.Item>
+            </Form>
+          </TabPane>
+        </Tabs>
       </Card>
     </div>
   );
@@ -140,35 +128,19 @@ const LoginPage = () => {
 
 const styles = {
   container: {
-    height: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    padding: 20
+    height: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    padding: 20,
   },
   card: {
-    width: '100%',
+    width: "100%",
     maxWidth: 400,
     borderRadius: 8,
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
   },
-  title: {
-    textAlign: 'center',
-    marginBottom: 24,
-    color: '#333'
-  },
-  button: {
-    height: 40,
-    fontWeight: 500
-  },
-  footer: {
-    marginTop: 16,
-    textAlign: 'center'
-  },
-  linkButton: {
-    padding: 0
-  }
 };
 
-export default LoginPage;
+export default Login;
