@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, Input, Button, Alert, Progress } from "antd";
+import './Register.css';
 
 // Lista negra de contraseñas
 const worstPasswords = [
@@ -17,9 +18,9 @@ const worstPasswords = [
 
 function isStrongPassword(password) {
   return (
-    password.length >= 8 &&
-    /[!@#$%^&*(),.?":{}|<>]/.test(password) &&
-    !worstPasswords.includes(password)
+      password.length >= 8 &&
+      /[!@#$%^&*(),.?":{}|<>]/.test(password) &&
+      !worstPasswords.includes(password)
   );
 }
 
@@ -50,68 +51,74 @@ export default function Register() {
   const strength = passwordStrength(password);
   const percent = (strength / 5) * 100;
   const status =
-    percent < 40 ? "exception" : percent < 80 ? "normal" : "success";
+      percent < 40 ? "exception" : percent < 80 ? "normal" : "success";
   const strengthText =
-    percent < 40 ? "Débil" : percent < 80 ? "Media" : "Fuerte";
+      percent < 40 ? "Débil" : percent < 80 ? "Media" : "Fuerte";
 
   return (
-    <div style={{ maxWidth: 350, margin: "40px auto" }}>
-      <h1 style={{ textAlign: "center", marginBottom: 24 }}>Registro</h1>
-      <Form onFinish={onFinish}>
-        <Form.Item
-          label="Usuario"
-          name="username"
-          rules={[{ required: true, message: "Por favor ingresa tu usuario" }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Contraseña"
-          name="password"
-          rules={[
-            { required: true, message: "Por favor ingresa tu contraseña" },
-            {
-              validator: (_, value) =>
-                !value || isStrongPassword(value)
-                  ? Promise.resolve()
-                  : Promise.reject(
-                      "La contraseña debe tener al menos 8 caracteres, un carácter especial"
-                    ),
-            },
-          ]}
-        >
-          <Input.Password
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Form.Item>
-        {password && (
-          <div style={{ marginBottom: 16 }}>
-            <Progress
-              percent={percent}
-              status={status}
-              showInfo={false}
-              strokeWidth={10}
-            />
-            <div style={{ textAlign: "right", fontSize: 12, color: "#888" }}>
-              Fortaleza: {strengthText}
-            </div>
+      <div className="register-page">
+        <div className="register-container">
+          <div className="register-card">
+            <h1 className="register-title">Registro</h1>
+            <Form onFinish={onFinish} className="register-form">
+              <Form.Item
+                  label="Usuario"
+                  name="username"
+                  rules={[{ required: true, message: "Por favor ingresa tu usuario" }]}
+              >
+                <Input className="custom-input" />
+              </Form.Item>
+              <Form.Item
+                  label="Contraseña"
+                  name="password"
+                  rules={[
+                    { required: true, message: "Por favor ingresa tu contraseña" },
+                    {
+                      validator: (_, value) =>
+                          !value || isStrongPassword(value)
+                              ? Promise.resolve()
+                              : Promise.reject(
+                                  "La contraseña debe tener al menos 8 caracteres, un carácter especial"
+                              ),
+                    },
+                  ]}
+              >
+                <Input.Password
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="custom-input"
+                />
+              </Form.Item>
+              {password && (
+                  <div className="password-strength-container">
+                    <Progress
+                        percent={percent}
+                        status={status}
+                        showInfo={false}
+                        strokeWidth={8}
+                        className="password-progress"
+                    />
+                    <div className="strength-text">
+                      Fortaleza: {strengthText}
+                    </div>
+                  </div>
+              )}
+              {error && (
+                  <Alert
+                      message={error}
+                      type="error"
+                      showIcon
+                      className="error-alert"
+                  />
+              )}
+              <Form.Item>
+                <Button type="primary" htmlType="submit" block className="submit-button">
+                  Iniciar Sesión
+                </Button>
+              </Form.Item>
+            </Form>
           </div>
-        )}
-        {error && (
-          <Alert
-            message={error}
-            type="error"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-        )}
-        <Form.Item>
-          <Button type="primary" htmlType="submit" block>
-            Iniciar Sesión
-          </Button>
-        </Form.Item>
-      </Form>
-    </div>
+        </div>
+      </div>
   );
 }
