@@ -9,14 +9,13 @@ function App() {
   return (
     <BrowserRouter>
       <Layout style={{ minHeight: "100vh" }}>
-        <Header>
+        {/* <Header>
           <AppMenu />
-        </Header>
+        </Header> */}
         <Content style={{ padding: "24px" }}>
           <AppRoutes />
         </Content>
-        <Footer style={{ textAlign: "center" }}>
-        </Footer>
+        <Footer style={{ textAlign: "center" }}></Footer>
       </Layout>
     </BrowserRouter>
   );
