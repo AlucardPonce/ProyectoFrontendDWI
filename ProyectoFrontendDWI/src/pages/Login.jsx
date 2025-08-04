@@ -1,12 +1,20 @@
-import { Form, Input, Button, Card, Typography, message, Alert, Tabs } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Card,
+  Typography,
+  message,
+  Alert,
+  Tabs,
+} from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { login, register } from "../services/auth";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
-
-const API_URL = "http://localhost:8080/api/auth";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -18,16 +26,14 @@ const Login = () => {
     setLoading(true);
     setFormError("");
     try {
-      const res = await axios.post(`${API_URL}/login`, values);
-      if (res.status === 200) {
-        message.success("Login exitoso");
-        // Guardar token si tienes
-        navigate("/home");
-      } else {
-        setFormError("Error en login");
-      }
+      console.log("Intentando login con:", values.username);
+      const data = await login(values.username, values.password);
+      console.log("Login exitoso:", data);
+      message.success("Inicio de sesión exitoso");
+      navigate("/home");
     } catch (err) {
-      setFormError(err.response?.data || "Error en autenticación");
+      console.error("Error en login:", err);
+      setFormError(err.message || "Error en inicio de sesión");
     } finally {
       setLoading(false);
     }
@@ -37,15 +43,13 @@ const Login = () => {
     setLoading(true);
     setFormError("");
     try {
-      const res = await axios.post(`${API_URL}/register`, values);
-      if (res.status === 200) {
-        message.success("Usuario registrado correctamente, ahora puedes iniciar sesión");
-        setActiveTab("login"); // Cambio a pestaña login
-      } else {
-        setFormError("Error en registro");
-      }
+      console.log("Intentando registro con:", values.username);
+      await register(values);
+      message.success("Registro exitoso, ahora puede iniciar sesión");
+      setActiveTab("login");
     } catch (err) {
-      setFormError(err.response?.data || "Error en registro");
+      console.error("Error en registro:", err);
+      setFormError(err.message || "Error al registrar usuario");
     } finally {
       setLoading(false);
     }
@@ -59,7 +63,12 @@ const Login = () => {
         </Title>
 
         {formError && (
-          <Alert message={formError} type="error" showIcon style={{ marginBottom: 20 }} />
+          <Alert
+            message={formError}
+            type="error"
+            showIcon
+            style={{ marginBottom: 20 }}
+          />
         )}
 
         <Tabs activeKey={activeTab} onChange={setActiveTab} centered>
@@ -85,7 +94,12 @@ const Login = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" block loading={loading}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  loading={loading}
+                >
                   Iniciar Sesión
                 </Button>
               </Form.Item>
@@ -114,7 +128,12 @@ const Login = () => {
               </Form.Item>
 
               <Form.Item>
-                <Button type="primary" htmlType="submit" block loading={loading}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  block
+                  loading={loading}
+                >
                   Registrar
                 </Button>
               </Form.Item>
