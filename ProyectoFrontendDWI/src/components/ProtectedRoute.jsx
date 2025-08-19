@@ -1,15 +1,34 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../services/AuthContext';
+import { Spin } from 'antd';
 
 const ProtectedRoute = ({ children }) => {
-  //const token = localStorage.getItem("token");
+  const { isAuthenticated, loading } = useAuth();
 
-  //if (!token) {
-    // Si no hay token, redirige al login
-    //return <Navigate to="/login" replace />;
-  //}
+  // Mostrar spinner mientras se valida el token
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        flexDirection: 'column',
+        gap: '16px'
+      }}>
+        <Spin size="large" />
+        <p>Validando sesión...</p>
+      </div>
+    );
+  }
 
-  // Si hay token, renderiza la ruta protegida
+  // Si no está autenticado, redirigir al login
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Si está autenticado, renderizar los children
   return children;
 };
 

@@ -6,13 +6,32 @@ import Categorias from './pages/Categorias';
 import TiposReq from './pages/TiposReq';
 import MainLayout from './Layout/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import { useAuth } from './services/AuthContext';
+import { Navigate } from 'react-router-dom';
 
 const AppRoutes = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  // Si está cargando, no mostrar nada o mostrar un spinner
+  if (loading) {
+    return null;
+  }
+
   return (
     <Routes>
       {/* Rutas públicas */}
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route 
+        path="/" 
+        element={
+          isAuthenticated() ? <Navigate to="/home" replace /> : <LoginPage />
+        } 
+      />
+      <Route 
+        path="/login" 
+        element={
+          isAuthenticated() ? <Navigate to="/home" replace /> : <LoginPage />
+        } 
+      />
 
       {/* Rutas protegidas anidadas dentro del layout */}
       <Route
@@ -24,7 +43,20 @@ const AppRoutes = () => {
         }
       >
         {/* Esta es la ruta principal que renderiza en /home */}
-        <Route index element={<div style={{ padding: 20 }}>Bienvenido al panel</div>} />
+        <Route 
+          index 
+          element={
+            <div style={{ 
+              padding: 20,
+              background: 'white',
+              borderRadius: 8,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}>
+              <h2>¡Bienvenido al panel de administración!</h2>
+              <p>Selecciona una opción del menú para comenzar.</p>
+            </div>
+          } 
+        />
 
         {/* Rutas protegidas hijas de /home */}
         <Route
@@ -60,6 +92,14 @@ const AppRoutes = () => {
           }
         />
       </Route>
+
+      {/* Ruta para manejar 404 o rutas no válidas */}
+      <Route 
+        path="*" 
+        element={
+          isAuthenticated() ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
+        } 
+      />
     </Routes>
   );
 };

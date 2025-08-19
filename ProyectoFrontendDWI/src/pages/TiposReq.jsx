@@ -6,8 +6,8 @@ const TipoReq = () => {
   const [form, setForm] = useState({ id: null, nombre: '', categoriaId: '' });
   const [editando, setEditando] = useState(false);
 
-  const API_TIPOS = 'http://localhost:8001/tipos-requisito';
-  const API_CATEGORIAS = 'http://localhost:8001/api/categorias';
+  const API_TIPOS = 'http://20.119.81.0:8082/tipos-requisito';
+  const API_CATEGORIAS = 'http://20.119.81.0:8082/api/categorias';
 
   useEffect(() => {
     fetchTipos();

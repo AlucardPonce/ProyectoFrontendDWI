@@ -1,33 +1,34 @@
 import { Form, Input, Button, Card, Typography, message, Alert, Tabs } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../services/AuthContext";
 
 const { Title } = Typography;
 const { TabPane } = Tabs;
-
-const API_URL = "http://localhost:8080/api/auth";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [activeTab, setActiveTab] = useState("login");
   const navigate = useNavigate();
+  const { login, register } = useAuth();
 
   const handleLogin = async (values) => {
     setLoading(true);
     setFormError("");
+
     try {
-      const res = await axios.post(`${API_URL}/login`, values);
-      if (res.status === 200) {
+      const result = await login(values);
+
+      if (result.success) {
         message.success("Login exitoso");
-        // Guardar token si tienes
         navigate("/home");
       } else {
-        setFormError("Error en login");
+        setFormError(result.error);
       }
-    } catch (err) {
-      setFormError(err.response?.data || "Error en autenticación");
+    } catch (error) {
+      setFormError("Error inesperado en login");
+      console.error('Error en login:', error);
     } finally {
       setLoading(false);
     }
@@ -36,16 +37,19 @@ const Login = () => {
   const handleRegister = async (values) => {
     setLoading(true);
     setFormError("");
+
     try {
-      const res = await axios.post(`${API_URL}/register`, values);
-      if (res.status === 200) {
-        message.success("Usuario registrado correctamente, ahora puedes iniciar sesión");
-        setActiveTab("login"); // Cambio a pestaña login
+      const result = await register(values);
+
+      if (result.success) {
+        message.success(result.data.message || "Usuario registrado correctamente, ahora puedes iniciar sesión");
+        setActiveTab("login");
       } else {
-        setFormError("Error en registro");
+        setFormError(result.error);
       }
-    } catch (err) {
-      setFormError(err.response?.data || "Error en registro");
+    } catch (error) {
+      setFormError("Error inesperado en registro");
+      console.error('Error en registro:', error);
     } finally {
       setLoading(false);
     }
@@ -111,6 +115,40 @@ const Login = () => {
                 ]}
               >
                 <Input.Password placeholder="Contraseña" />
+              </Form.Item>
+
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  { required: true, message: "Ingrese su email" },
+                  { type: "email", message: "Email inválido" }
+                ]}
+              >
+                <Input placeholder="Email" />
+              </Form.Item>
+
+              <Form.Item
+                label="Nombre"
+                name="nombre"
+                rules={[{ required: true, message: "Ingrese su nombre" }]}
+              >
+                <Input placeholder="Nombre" />
+              </Form.Item>
+
+              <Form.Item
+                label="Apellido"
+                name="apellido"
+                rules={[{ required: true, message: "Ingrese su apellido" }]}
+              >
+                <Input placeholder="Apellido" />
+              </Form.Item>
+
+              <Form.Item
+                label="Teléfono"
+                name="telefono"
+              >
+                <Input placeholder="Teléfono (opcional)" />
               </Form.Item>
 
               <Form.Item>

@@ -10,7 +10,7 @@ const Categorias = () => {
     categoriaEstatal: false
   });
 
-  const apiUrl = "http://localhost:8001/api/categorias";
+  const apiUrl = "http://20.119.81.0:8082/api/categorias";
 
   const fetchCategorias = () => {
     setLoading(true);
