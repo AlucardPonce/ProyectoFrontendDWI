@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from 'antd';
+import { Button, Table, Modal, Form, Input, Switch, Space, Spin, message } from 'antd';
 
 // ✅ Definimos la base URL en una constante
 const BASE_URL = "http://20.119.81.0:8080/api";
@@ -9,7 +9,7 @@ const Division = () => {
   const [loading, setLoading] = useState(true);
   const [editando, setEditando] = useState(null);
   const [creando, setCreando] = useState(false);
-  const [form, setForm] = useState({ nombre: '', clave: '', activo: true });
+  const [form] = Form.useForm();
 
   const fetchDivisiones = () => {
     setLoading(true);
@@ -24,6 +24,7 @@ const Division = () => {
       })
       .catch((err) => {
         console.error(err);
+        message.error('Error al cargar divisiones');
         setLoading(false);
       });
   };
@@ -32,78 +33,148 @@ const Division = () => {
     fetchDivisiones();
   }, []);
 
-  const showaddModal = () => {
+  const showAddModal = () => {
     setEditando(null);
-    setForm({ nombre: '', clave: '', activo: true });
     setCreando(true);
-  };
-
-  const handleEliminar = (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar esta división?')) return;
-    fetch(`${BASE_URL}/division/${id}`, {
-      method: 'DELETE',
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Error al eliminar');
-        fetchDivisiones();
-      })
-      .catch(console.error);
+    form.resetFields();
+    form.setFieldsValue({ activo: true });
   };
 
   const handleEditar = (division) => {
     setEditando(division.id);
-    setForm({
+    form.setFieldsValue({
       nombre: division.nombre,
       clave: division.clave,
       activo: division.activo,
     });
   };
 
+  const handleEliminar = (id) => {
+    Modal.confirm({
+      title: 'Confirmar eliminación',
+      content: '¿Estás seguro de eliminar esta división?',
+      onOk: () => {
+        fetch(`${BASE_URL}/division/${id}`, { method: 'DELETE' })
+          .then((res) => {
+            if (!res.ok) throw new Error('Error al eliminar');
+            message.success('División eliminada');
+            fetchDivisiones();
+          })
+          .catch((err) => {
+            console.error(err);
+            message.error('Error al eliminar división');
+          });
+      },
+    });
+  };
+
   const handleGuardar = () => {
-    fetch(`${BASE_URL}/division/${editando}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Error al editar');
-        setEditando(null);
-        fetchDivisiones();
+    form
+      .validateFields()
+      .then((values) => {
+        fetch(`${BASE_URL}/division/${editando}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(values),
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error('Error al editar');
+            message.success('División editada');
+            setEditando(null);
+            fetchDivisiones();
+          })
+          .catch((err) => {
+            console.error(err);
+            message.error('Error al editar división');
+          });
       })
-      .catch(console.error);
+      .catch(() => {});
   };
 
   const handleCrear = () => {
-    fetch(`${BASE_URL}/division`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Error al crear división');
-        return res.json();
+    form
+      .validateFields()
+      .then((values) => {
+        fetch(`${BASE_URL}/division`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(values),
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error('Error al crear división');
+            return res.json();
+          })
+          .then(() => {
+            message.success('División creada');
+            setCreando(false);
+            form.resetFields();
+            fetchDivisiones();
+          })
+          .catch((err) => {
+            console.error(err);
+            message.error('Error al crear división');
+          });
       })
-      .then(() => {
-        setCreando(false);
-        setForm({ nombre: '', clave: '', activo: true });
-        fetchDivisiones();
-      })
-      .catch(console.error);
+      .catch(() => {});
   };
+
+  const columns = [
+    { title: 'Nombre', dataIndex: 'nombre', key: 'nombre' },
+    { title: 'Clave', dataIndex: 'clave', key: 'clave' },
+    { title: 'Activo', dataIndex: 'activo', key: 'activo', render: (activo) => (activo ? 'Sí' : 'No') },
+    {
+      title: 'Acciones',
+      key: 'acciones',
+      render: (_, record) => (
+        <Space>
+          <Button type="link" onClick={() => handleEditar(record)}>Editar</Button>
+          <Button type="link" danger onClick={() => handleEliminar(record.id)}>Eliminar</Button>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="container">
-
-      <Button 
-        type="primary"
-        onClick={showaddModal}
-        style={{ marginBottom: '20px' }}
-      >
+      <Button type="primary" onClick={showAddModal} style={{ marginBottom: 20 }}>
         Agregar División
       </Button>
 
-      {/* Resto del código igual */}
-      {/* ... */}
+      {loading ? (
+        <Spin size="large" />
+      ) : (
+        <Table columns={columns} dataSource={divisiones} rowKey="id" />
+      )}
+
+      <Modal
+        title={editando ? 'Editar División' : 'Crear División'}
+        open={editando !== null || creando}
+        onOk={editando ? handleGuardar : handleCrear}
+        onCancel={() => {
+          setEditando(null);
+          setCreando(false);
+        }}
+      >
+        <Form form={form} layout="vertical">
+          <Form.Item
+            name="nombre"
+            label="Nombre"
+            rules={[{ required: true, message: 'Ingrese el nombre de la división' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="clave"
+            label="Clave"
+            rules={[{ required: true, message: 'Ingrese la clave de la división' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="activo" label="Activo" valuePropName="checked">
+            <Switch />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

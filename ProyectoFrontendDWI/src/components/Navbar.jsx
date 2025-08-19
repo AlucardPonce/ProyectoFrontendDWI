@@ -1,148 +1,141 @@
 import React from 'react';
-import { Layout, Menu, Button, Avatar, Dropdown, Space, Typography, message } from 'antd';
 import {
-    UserOutlined,
-    LogoutOutlined,
     HomeOutlined,
     AppstoreOutlined,
-    SettingOutlined,
-    TeamOutlined
+    BookOutlined,
+    TagsOutlined,
+    FileDoneOutlined,
+    SearchOutlined,
+    LogoutOutlined
 } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../services/AuthContext';
-
-const { Header } = Layout;
-const { Text } = Typography;
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../services/AuthContext'; // Ajusta la ruta a tu AuthContext
+// import logo from '../assets/Logo.png'; // Descomenta si tienes logo
 
 const Navbar = () => {
+    const { setUser } = useAuth(); // Función para actualizar estado del usuario
     const navigate = useNavigate();
-    const location = useLocation();
-    const { user, logout } = useAuth();
 
-    const handleLogout = async () => {
-        try {
-            await logout();
-            message.success('Sesión cerrada exitosamente');
-            navigate('/login');
-        } catch (error) {
-            console.error('Error al cerrar sesión:', error);
-            message.error('Error al cerrar sesión');
-            navigate('/login'); // Redirigir de todos modos
-        }
+    const handleLogout = () => {
+        // Limpiar almacenamiento local
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Actualizar estado global de AuthContext
+        setUser(null);
+        // Redirigir al login
+        navigate('/login');
     };
 
-    const menuItems = [
-        {
-            key: '/home',
-            icon: <HomeOutlined />,
-            label: 'Inicio',
-            onClick: () => navigate('/home')
-        },
-        {
-            key: '/home/division',
-            icon: <TeamOutlined />,
-            label: 'División',
-            onClick: () => navigate('/home/division')
-        },
-        {
-            key: '/home/programas-educativos',
-            icon: <AppstoreOutlined />,
-            label: 'Programas Educativos',
-            onClick: () => navigate('/home/programas-educativos')
-        },
-        {
-            key: '/home/categorias',
-            icon: <SettingOutlined />,
-            label: 'Categorías',
-            onClick: () => navigate('/home/categorias')
-        },
-        {
-            key: '/home/tipos-requisitos',
-            icon: <SettingOutlined />,
-            label: 'Tipos de Requisitos',
-            onClick: () => navigate('/home/tipos-requisitos')
-        }
-    ];
-
-    const userMenuItems = [
-        {
-            key: 'profile',
-            icon: <UserOutlined />,
-            label: (
-                <div>
-                    <div>{user?.nombre} {user?.apellido}</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>@{user?.username}</div>
-                </div>
-            )
-        },
-        {
-            type: 'divider'
-        },
-        {
-            key: 'logout',
-            icon: <LogoutOutlined />,
-            label: 'Cerrar Sesión',
-            onClick: handleLogout
-        }
-    ];
-
     return (
-        <Header style={{
-            position: 'fixed',
-            zIndex: 1000,
-            width: '100%',
-            height: '60px',
-            padding: '0 20px',
-            background: '#fff',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-        }}>
-            {/* Logo/Título */}
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                <Text strong style={{ fontSize: '18px', marginRight: '20px', color: '#1890ff' }}>
-                    Sistema de Gestión
-                </Text>
+        <nav style={styles.navbar}>
+            <div style={styles.navContent}>
+                <div style={styles.logo}>
+                    <Link to="/home">
+                        <img
+                            // src={logo}
+                            alt="Logo"
+                            style={{
+                                height: '40px',
+                                width: '40px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                backgroundColor: '#fff',
+                                borderRadius: '50%'
+                            }}
+                        />
+                    </Link>
+                </div>
+
+                <div style={styles.navLinks}>
+                    <Link to="/home" style={styles.link}>
+                        <HomeOutlined /> Inicio
+                    </Link>
+                    <Link to="/home/division" style={styles.link}>
+                        <AppstoreOutlined /> División
+                    </Link>
+                    <Link to="/home/programas-educativos" style={styles.link}>
+                        <BookOutlined /> Programas
+                    </Link>
+                    <Link to="/home/categorias" style={styles.link}>
+                        <TagsOutlined /> Categorías
+                    </Link>
+                    <Link to="/home/tipos-requisitos" style={styles.link}>
+                        <FileDoneOutlined /> Requisitos
+                    </Link>
+
+                    <div style={styles.searchContainer}>
+                        <SearchOutlined style={styles.searchIcon} />
+                        <input type="text" placeholder="Buscar..." style={styles.input} />
+                    </div>
+
+                    {/* Botón de Cerrar Sesión */}
+                    <button onClick={handleLogout} style={styles.logoutButton}>
+                        <LogoutOutlined /> Cerrar Sesión
+                    </button>
+                </div>
             </div>
-
-            {/* Menú de navegación */}
-            <Menu
-                mode="horizontal"
-                selectedKeys={[location.pathname]}
-                items={menuItems}
-                style={{
-                    flex: 1,
-                    border: 'none',
-                    justifyContent: 'center'
-                }}
-            />
-
-            {/* Usuario y logout */}
-            <Space>
-                <Text style={{ fontWeight: 500 }}>
-                    {user?.nombre} {user?.apellido}
-                </Text>
-                <Dropdown
-                    menu={{ items: userMenuItems }}
-                    placement="bottomRight"
-                    trigger={['click']}
-                >
-                    <Button
-                        type="text"
-                        icon={
-                            <Avatar
-                                size="small"
-                                style={{ backgroundColor: '#1890ff' }}
-                                icon={<UserOutlined />}
-                            />
-                        }
-                        style={{ display: 'flex', alignItems: 'center' }}
-                    />
-                </Dropdown>
-            </Space>
-        </Header>
+        </nav>
     );
+};
+
+const styles = {
+    navbar: {
+        position: 'fixed',
+        top: 0,
+        width: '100%',
+        backgroundColor: '#001529',
+        zIndex: 1000,
+        padding: '10px 20px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+    },
+    navContent: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    logo: {
+        display: 'flex',
+        alignItems: 'center'
+    },
+    navLinks: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px'
+    },
+    link: {
+        color: 'white',
+        textDecoration: 'none',
+        fontSize: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px'
+    },
+    searchContainer: {
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center'
+    },
+    searchIcon: {
+        position: 'absolute',
+        left: '8px',
+        color: '#999'
+    },
+    input: {
+        padding: '5px 10px 5px 30px',
+        borderRadius: '4px',
+        border: 'none',
+        outline: 'none'
+    },
+    logoutButton: {
+        backgroundColor: 'transparent',
+        border: 'none',
+        color: 'white',
+        cursor: 'pointer',
+        fontSize: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px'
+    }
 };
 
 export default Navbar;

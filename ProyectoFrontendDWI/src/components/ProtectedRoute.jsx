@@ -1,35 +1,42 @@
-import React from 'react';
+// ProtectedRoute.jsx
+import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext';
 import { Spin } from 'antd';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+    const { isAuthenticated, loading } = useAuth();
+    const [redirect, setRedirect] = useState(false);
 
-  // Mostrar spinner mientras se valida el token
-  if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '16px'
-      }}>
-        <Spin size="large" />
-        <p>Validando sesión...</p>
-      </div>
-    );
-  }
+    useEffect(() => {
+        if (!loading && !isAuthenticated()) {
+            setRedirect(true);
+        } else {
+            setRedirect(false);
+        }
+    }, [loading, isAuthenticated]);
 
-  // Si no está autenticado, redirigir al login
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
+    if (loading) {
+        return (
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                height: '100vh',
+                flexDirection: 'column',
+                gap: '16px'
+            }}>
+                <Spin size="large" />
+                <p>Validando sesión...</p>
+            </div>
+        );
+    }
 
-  // Si está autenticado, renderizar los children
-  return children;
+    if (redirect) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
 };
 
 export default ProtectedRoute;

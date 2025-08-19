@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
 
-    const API_URL = "http://20.119.81.0:8083/api";
+    const API_URL = "http://20.119.81.0:8083/api/auth";
 
     // Configurar axios para incluir el token en todas las peticiones
     useEffect(() => {
