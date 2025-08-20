@@ -33,7 +33,7 @@ import {
 const { Title, Text } = Typography;
 
 // ✅ Base URL configurada
-const BASE_URL = "http://localhost:8080/api";
+const BASE_URL = "http://20.119.81.0:8080/api";
 
 const Division = () => {
   const [divisiones, setDivisiones] = useState([]);
