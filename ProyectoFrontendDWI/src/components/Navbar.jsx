@@ -6,7 +6,8 @@ import {
     TagsOutlined,
     FileDoneOutlined,
     SearchOutlined,
-    LogoutOutlined
+    LogoutOutlined,
+    UserOutlined
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext'; // Ajusta la ruta a tu AuthContext
@@ -61,6 +62,10 @@ const Navbar = () => {
                     </Link>
                     <Link to="/home/tipos-requisitos" style={styles.link}>
                         <FileDoneOutlined /> Requisitos
+                    </Link>
+                    //opción para profesores
+                    <Link to="/home/profesores" style={styles.link}>
+                        <UserOutlined /> Profesores
                     </Link>
 
                     <div style={styles.searchContainer}>

@@ -4,6 +4,8 @@ import Division from './pages/Division';
 import ProgramaEducativo from './pages/Component/ProgramaEducativo';
 import Categorias from './pages/Categorias';
 import TiposReq from './pages/TiposReq';
+//Profesores
+import Profesor from './pages/Profesor';
 import MainLayout from './Layout/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './services/AuthContext';
@@ -91,6 +93,15 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+          // Ruta para profesores
+          <Route
+              path="profesores"
+              element={
+                  <ProtectedRoute>
+                      <Profesor />
+                  </ProtectedRoute>
+              }
+          />
       </Route>
 
       {/* Ruta para manejar 404 o rutas no válidas */}
