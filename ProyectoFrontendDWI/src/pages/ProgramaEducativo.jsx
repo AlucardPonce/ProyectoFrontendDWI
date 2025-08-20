@@ -1,5 +1,5 @@
 import React from "react";
-import ProgramaEducativoCRUD from "../components/ProgramaEducativoCRUD";
+import ProgramaEducativoCRUD from "../pages/Component/ProgramaEducativo";
 
 export default function ProgramaEducativo() {
     return (

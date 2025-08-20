@@ -1,24 +1,13 @@
-import { BrowserRouter } from "react-router-dom";
-import { Layout } from "antd";
-import AppMenu from "./Menu";
-import AppRoutes from "./Routes";
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from './Routes';
 
-const { Header, Content, Footer } = Layout;
-
-function App() {
+const App = () => {
   return (
     <BrowserRouter>
-      <Layout style={{ minHeight: "100vh" }}>
-        {/* <Header>
-          <AppMenu />
-        </Header> */}
-        <Content style={{ padding: "24px" }}>
-          <AppRoutes />
-        </Content>
-        <Footer style={{ textAlign: "center" }}></Footer>
-      </Layout>
+      <AppRoutes />
     </BrowserRouter>
   );
-}
+};
 
 export default App;
