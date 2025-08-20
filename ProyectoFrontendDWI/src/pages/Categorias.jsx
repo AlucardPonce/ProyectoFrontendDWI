@@ -55,7 +55,7 @@ const Division = () => {
   const [formTipoRequisito] = Form.useForm();
   const [formRequisito] = Form.useForm();
 
-  // Base URL de la API
+  // Base URL de la API 
   const API_BASE_URL = 'http://20.119.81.0:8082/api';
 
   // Cargar datos iniciales de la API

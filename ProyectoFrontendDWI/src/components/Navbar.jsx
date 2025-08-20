@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthContext'; // Ajusta la ruta a tu AuthContext
-// import logo from '../assets/Logo.png'; // Descomenta si tienes logo
+import logo from '../assets/Logo Monkey D. Luffy (Logo One Piece).png'; // Descomenta si tienes logo
 
 const Navbar = () => {
     const { setUser } = useAuth(); // Función para actualizar estado del usuario
@@ -33,8 +33,8 @@ const Navbar = () => {
                 <div style={styles.logo}>
                     <Link to="/home">
                         <img
-                            // src={logo}
-                            alt="Logo"
+                            src={logo}
+                            alt="../assets/Logo Monkey D. Luffy (Logo One Piece).png"
                             style={{
                                 height: '40px',
                                 width: '40px',
@@ -60,10 +60,6 @@ const Navbar = () => {
                     <Link to="/home/categorias" style={styles.link}>
                         <TagsOutlined /> Categorías
                     </Link>
-                    <Link to="/home/tipos-requisitos" style={styles.link}>
-                        <FileDoneOutlined /> Requisitos
-                    </Link>
-                    //opción para profesores
                     <Link to="/home/profesores" style={styles.link}>
                         <UserOutlined /> Profesores
                     </Link>
