@@ -16,6 +16,10 @@ function AppMenu() {
         <Menu.Item key="TiposReq">
         <Link to="/tipos-requisitos">Tipos de Requisitos</Link>
       </Menu.Item>
+        // Agregar opción para profesores
+        <Menu.Item key="profesores">
+            <Link to="/profesores">Profesores</Link>
+        </Menu.Item>
     </Menu>
   );
 }
